@@ -1,0 +1,85 @@
+.top-bar {
+  background: $dark;
+  width: 100%;
+
+  &__wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 10px 0;
+
+    @media(max-width: 767px) {
+      justify-content: center;
+      flex-direction: column;
+    }
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 10px 20px;
+    flex-wrap: wrap;
+    
+    &--left {
+      justify-content: flex-start;
+            
+      @media(max-width: 767px) {
+        justify-content: center;
+      }
+    }
+
+    &--right {
+      justify-content: flex-end;
+
+      @media(max-width: 767px) {
+        justify-content: center;
+      }
+    }
+  }
+
+  &__phone, &__email {
+    display: flex;
+    gap: 8px;
+    color: $white;
+
+    &::before {
+      content: '';
+      display: block;
+    }
+
+    &:hover {
+      color: $white;
+    }
+  }
+
+  &__phone {
+    &::before {
+      width: 20px;
+      height: 20px;
+      background: url('./images/phone-icon.svg') center/contain no-repeat;
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  &__email {
+    &::before {
+      width: 20px;
+      height: 20px;
+      background: url('./images/email-icon.svg') center/contain no-repeat;
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  &__social-media {
+    margin: 0;
+
+    a {
+      max-width: 25px;
+      height: 25px;
+      filter: brightness(0) invert(1);
+    }
+  }
+}

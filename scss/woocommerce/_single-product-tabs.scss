@@ -1,0 +1,53 @@
+.tabs {
+  width: 100%;
+  margin: rem-calc(40) 0 rem-calc(40);
+
+  &__wrapper {
+    padding: 0 0 rem-calc(60);
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  &__buttons {
+    display: flex;
+    width: auto;
+    align-items: center;
+
+    @media(max-width: 767px) {
+      justify-content: center;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+
+  &__content {
+    padding: rem-calc(20) 0 0;
+    margin: rem-calc(-1) 0 0;
+    min-height: rem-calc(360);
+  }
+
+  &__details, &__shipping {
+    position: relative;
+    height: 100%;
+  }
+
+  &__shipping {
+    display: none;
+  }
+
+  &__dimensions, &__features {
+    > span {
+      color: $black;
+      font-weight: 700;
+      display: block;
+      margin: rem-calc(25) 0 0;
+    }
+
+    p {
+      margin: rem-calc(5) 0 0;
+
+      span {
+        font-weight: 700;
+      }
+    }
+  }
+}

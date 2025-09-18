@@ -1,0 +1,38 @@
+.icons {
+  width: 100%;
+  position: relative;
+
+  &--background {
+    background: $very-light-gray;
+  }
+
+  &__wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: auto;
+
+    @media(max-width: 1199px) {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  &__item {
+    max-width: rem-calc(230);
+    text-align: center;
+    padding: rem-calc(15);
+    width: 100%;
+
+    > div {
+      width: rem-calc(58);
+      height: rem-calc(58);
+      overflow: hidden;
+      margin: auto;
+      
+      img {
+        max-width: 100%;
+      }
+    }
+  }
+}

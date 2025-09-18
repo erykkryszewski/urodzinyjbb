@@ -1,0 +1,31 @@
+.bottom-bar {
+  width: 100%;
+  background: $white;
+  padding: 0;
+
+  &__wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: rem-calc(15) 0;
+
+    @media(max-width: 767px) {
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    p {
+      color: $text-color;
+      font-size: rem-calc(12);
+      margin: 0;
+
+      a {
+        color: $theme-color;
+        font-weight: 700;
+        text-decoration: none;
+      }
+    }
+  }
+}

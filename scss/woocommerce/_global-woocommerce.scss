@@ -1,0 +1,22 @@
+.theme-content-product-price {
+  color: $theme-color;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.theme-content-product-price-deleted {
+  color: #FF0000;
+  font-size: rem-calc(16.5);
+  font-weight: 500;
+  margin: 0 8px 0 0;
+}
+
+.theme-content-product-title {
+  @extend .h4;
+  font-family: $font-primary;
+  text-transform: initial;
+}
+
+.added_to_cart {
+  display: none !important;
+}

@@ -1,0 +1,63 @@
+{
+    "key": "group_60c67b4fbf7b9",
+    "title": "Block: Popular products",
+    "fields": [
+        {
+            "key": "field_60c67b6d367b2",
+            "label": "Section title",
+            "name": "title",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "rows": 1,
+            "new_lines": "br"
+        },
+        {
+            "key": "field_66a573e93e766",
+            "label": "Products category slug",
+            "name": "products_category_slug",
+            "type": "text",
+            "instructions": "Wpisz slug kategorii, którą chcesz pokazać w tej sekcji. Slug znajdziesz wchodząc w \"produkty\" -> \"kategorie\". Domyślny slug dla kategorii \"Książki\" to \"ksiazki\".",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": "",
+            "maxlength": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/products"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "modified": 1722119621
+}

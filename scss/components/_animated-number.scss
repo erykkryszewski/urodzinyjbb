@@ -1,0 +1,11 @@
+.animated-number {
+  &__circle {
+    animation: animated-number-fill 2s reverse;
+    transform: rotate(-90deg); 
+    transform-origin: center;
+  }
+}
+
+@keyframes animated-number-fill {
+  to { stroke-dasharray: 0 100; }
+}

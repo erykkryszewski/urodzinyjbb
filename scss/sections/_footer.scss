@@ -1,0 +1,82 @@
+.footer {
+  background: $theme-color2;
+  width: 100%;
+  margin: 60px 0 0;
+
+  &__wrapper {
+    padding: 45px 0;
+  }
+
+  &__column {
+    width: 100%;
+  }
+
+  &__logo {
+    display: inline-block;
+    margin: 5px 0 0;
+
+    img {
+      max-width: rem-calc(200);
+      height: auto;
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  &__phone, &__email {
+    display: block;
+    font-weight: 400;
+    font-size: 18px;
+    color: $white;
+  }
+
+  &__phone {
+    margin: 27px 0 rem-calc(15);
+  }
+
+  &__address {
+    span {
+      display: block;
+      font-size: 18px;
+      color: $white;
+      font-weight: 500;
+      margin: rem-calc(15) 0 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 18px;
+    }
+  }
+
+  &__subtitle {
+    @media(max-width: 767px) {
+      margin: rem-calc(25) auto 0;
+    }
+  }
+
+  &__navigation {
+    width: 100%;
+
+    h3 {
+      @extend .h3;
+      color: $white;
+    }
+
+    ul {
+      width: 100%;
+      margin: rem-calc(20) 0 0;
+
+      li {
+        margin: rem-calc(8) 0 0;
+        list-style: none;
+
+        a {
+          color: $white;
+          font-size: 18px;
+          line-height: 1.5;
+          max-width: rem-calc(200);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+.slick-dots {
+  display: flex;
+  justify-content: center;
+  max-width: initial;
+      
+  @media(max-width: 767px) {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  li {
+    padding: 0 rem-calc(5);
+    list-style: none;
+              
+    @media(max-width: 767px) {
+      margin: rem-calc(5);
+    }
+
+    &:before {
+      display: none;
+    }
+
+    button {
+      width: rem-calc(12);
+      height: rem-calc(12);
+      background: rgba($theme-color, 0.5);
+      border-radius: 50%;
+      font-size: rem-calc(0);
+    }
+
+    &.slick-active {
+      button {
+        background: $theme-color;
+      }
+    }
+  }
+}

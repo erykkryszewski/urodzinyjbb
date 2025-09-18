@@ -1,0 +1,125 @@
+.logos {
+  width: 100%;
+  text-align: center;
+  padding: 75px 0;
+  position: relative;
+
+  &__items {
+    width: 100%;
+
+    a {
+      height: rem-calc(100);
+      width: 100%;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+
+      img {
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        max-width: 100%;
+        margin: auto;
+      }
+    }
+
+    &--one-slide {
+      a {
+        height: auto;
+
+        img {
+          height: auto;
+          width: auto;
+          object-fit: initial;
+        }
+      }
+    }
+  }
+
+  /* slick styles overwrite */
+
+  .slick-track {
+    align-items: center;
+  }
+
+  /* the slides */
+  .slick-slide {
+    margin: 0 rem-calc(3);
+  }
+  /* the parent */
+  .slick-list {
+    margin: 0 rem-calc(-3);
+  }
+  
+  /* slick arrows */
+  .slick-arrow {
+    position: absolute;
+    width: rem-calc(14);
+    height: rem-calc(25);
+    bottom: 50%;
+    transform: translateY(50%);
+    z-index: 4;
+
+    &.slick-prev {
+      background: url('./images/left-arrow.png') center/contain no-repeat;
+      left: rem-calc(-50);
+        
+      @media(max-width: 1399px) {
+        left: rem-calc(-25);
+      }
+    }
+
+    &.slick-next {
+      background: url('./images/right-arrow.png') center/contain no-repeat;
+      right: rem-calc(-50);
+
+      @media(max-width: 1399px) {
+        right: rem-calc(-25);
+      }
+    }
+  }
+
+  /* slick dots */
+  .slick-dots {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    max-width: initial;
+    position: absolute;
+    bottom: rem-calc(-50);
+    right: 50%;
+    transform: translateX(50%);
+    z-index: 5;
+        
+    @media(max-width: 767px) {
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    li {
+      padding: 0 rem-calc(5);
+                
+      @media(max-width: 767px) {
+        margin: rem-calc(3);
+      }
+
+      &:before {
+        display: none;
+      }
+
+      button {
+        width: rem-calc(15);
+        height: rem-calc(15);
+        background: rgba($theme-color, 0.5);
+        font-size: 0;
+      }
+
+      &.slick-active {
+        button {
+          background: $theme-color;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,201 @@
+.contact {
+  width: 100%;
+  position: relative;
+
+  &--background {
+    background: $very-light-gray;
+  }
+
+  &__subtitle {
+    margin: rem-calc(20) 0 0;
+  }
+
+  &__details {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+
+    @media(max-width: 767px) {
+      align-items: center;
+      justify-content: center;
+    }
+
+    > p {
+      margin: 13px 0;
+    }
+  }
+
+  &__phone, &__email {
+    display: flex;
+    @extend .paragraph;
+    font-size: 14px;
+    margin: 0;
+    gap: 8px;
+    color: $text-color;
+    font-weight: 500;
+
+    &::before {
+      content: '';
+      display: block;
+      filter: brightness(0.2);
+      position: relative;
+      bottom: -2px;
+    }
+
+    &:hover {
+      color: $text-color;
+    }
+  }
+
+  &__phone {
+    margin: 20px 0 0;
+
+    &::before {
+      width: 20px;
+      height: 20px;
+      background: url('./images/phone-icon.svg') center/contain no-repeat;
+    }
+  }
+
+  &__email {
+    margin: 5px 0 0;
+
+    &::before {
+      width: 20px;
+      height: 20px;
+      background: url('./images/email-icon.svg') center/contain no-repeat;
+    }
+  }
+
+  &__social-media {
+    margin: rem-calc(10) 0 0;
+  }
+
+  &__address {
+    margin: 10px 0 0;
+
+    p {
+      margin: 0;
+
+      @media(max-width: 767px) {
+        text-align: center;
+      }
+    }
+  }
+
+  &__image {
+    width: 100%;
+    height: 250px;
+    width: 200px;
+    max-width: 100%;
+    margin: 18px 0 15px;
+  }
+
+  &__form {
+    margin: 0;
+
+    @media(max-width: 767px) {
+      margin: rem-calc(30) 0 0;
+    }
+
+    form {
+      .gform_body {
+        .gform_fields {
+          display: flex;
+          grid-column-gap: unset;
+          grid-row-gap: unset;
+          grid-template-columns: auto;
+          flex-wrap: wrap;
+
+          > div {
+            width: 100%;
+            grid-column: unset;
+            margin: rem-calc(18) 0 0;
+
+            &:nth-child(1), 
+            &:nth-child(2), 
+            &:nth-child(3), 
+            &:nth-child(4) {
+              width: calc(50% - 8px);
+            }
+
+            &:nth-child(1), 
+            &:nth-child(3) {
+              margin: rem-calc(18) rem-calc(8) 0 0 !important;
+            }
+
+            &:nth-child(2), 
+            &:nth-child(4) {
+              margin: rem-calc(18) 0 0 rem-calc(8) !important;
+            }
+
+            &#field_6_6 {
+              margin: 0 !important;
+            }
+
+            input {
+              line-height: 1 !important;
+            }
+
+            textarea {
+              height: rem-calc(181) !important;
+            }
+
+            .ginput_recaptcha.gform-initialized {
+              margin: 0 0 10px;
+            }
+          }
+
+          p, label {
+            margin: 0;
+            font-size: rem-calc(15);
+            color: $input-color;
+            line-height: 1.5;
+      
+            a {
+              color: $theme-color;
+              text-decoration: underline;
+              font-weight: 400;
+            }
+          }
+
+          // if you want to have no labels
+          .gfield_label {
+            display: none;
+          }
+
+          fieldset {
+            margin: 0;
+            border: none !important;
+          }
+        }
+      }
+
+      .gform_footer {
+        margin: rem-calc(15) 0 0 !important;
+        text-align: right; 
+        display: block !important;
+  
+        @media(max-width: 767px) {
+          text-align: center; 
+        }
+
+        input {
+          border-radius: $theme-border-radius !important;
+          border: 2px solid $theme-color;
+
+          &:hover {
+            border: 2px solid $theme-color;
+          }
+        }
+      }
+    }
+
+    .gform_confirmation_message {
+      @extend .paragraph;
+    }
+  }
+}

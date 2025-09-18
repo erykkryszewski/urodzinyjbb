@@ -1,0 +1,73 @@
+.testimonials {
+  width: 100%;
+  position: relative;
+
+  &--background {
+    background: $very-light-gray;
+  }
+
+  &__wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  &__title {
+    text-align: center;
+  }
+
+  &__image {
+    width: rem-calc(80);
+    height: rem-calc(80);
+    flex-shrink: 0;
+
+    img {
+      border-radius: 50%;
+    }
+  }
+
+  &__content {
+    margin: rem-calc(25) 0 0;
+    width: 100%;
+    display: flex;
+    gap: rem-calc(20);
+    align-items: center;
+
+    @media(max-width: 767px) {
+      justify-content: center;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__name {
+    font-size: rem-calc(17);
+  }
+
+  &__role {
+    font-size: rem-calc(12);
+    font-weight: 400;
+    text-align: left;
+  }
+
+  &__slider {
+    /* slick styles overwriting */
+    .slick-slide {
+      margin: 0 rem-calc(20);
+    }
+
+    .slick-list {
+      margin: 0 rem-calc(-20);
+    }
+
+    .slick-dots {
+      margin: rem-calc(15) auto 0;
+    }
+
+    .slick-arrow {
+      display: none;
+    }
+  }
+}

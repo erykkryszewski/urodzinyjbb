@@ -1,0 +1,23 @@
+.social-media {
+  display: flex;
+  gap: rem-calc(10);
+  align-items: center;
+  margin: rem-calc(30) 0 rem-calc(20);
+  
+  @media(max-width: 767px) {
+    justify-content: center;
+  }
+
+  a {
+    display: block;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: rem-calc(32);
+    height: rem-calc(32);
+
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+}

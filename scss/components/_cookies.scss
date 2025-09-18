@@ -1,0 +1,48 @@
+.cookies {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: rem-calc(20) rem-calc(20) rem-calc(25);
+  background: $theme-color;
+  position: fixed;
+  bottom: 0;
+  opacity: 0;
+  transform: scale(1,0);
+  transition: all 350ms ease-in-out;
+  transform-origin: bottom;
+  z-index: 99;
+  pointer-events: none;
+
+  p {
+    text-align: center;
+    color: $white;
+    margin: 0;
+  }
+
+  a {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  &__button {
+    margin: rem-calc(15) 0 0;
+    background: $white;
+    color: $theme-color;
+    border: 1px solid $white;
+
+    &:hover {
+      background: $white;
+      color: $theme-color;
+      border: 1px solid $white;
+    }
+  }
+
+  &.show {
+    opacity: 1;
+    transform: scale(1,1);
+    pointer-events: inherit;
+  }
+}

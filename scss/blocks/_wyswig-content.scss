@@ -1,0 +1,26 @@
+.wyswig-content {
+  width: 100%;
+  position: relative;
+
+  &--background {
+    background: $very-light-gray;
+  }
+
+  &__wrapper {
+    width: 100%;
+
+    h1, h2, h3, h4, h5 {
+      margin-bottom: 25px;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    > * {
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+}

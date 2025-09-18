@@ -1,0 +1,44 @@
+.breadcrumbs {
+  margin: rem-calc(50) 0 rem-calc(60);
+
+  @media(max-width: 1199px) {
+    margin: rem-calc(10) 0 rem-calc(30);
+  }
+
+  &--single {
+    margin: rem-calc(50) 0 rem-calc(0);
+
+    @media(max-width: 1199px) {
+      margin: rem-calc(10) 0 rem-calc(30);
+    }
+  }
+
+  a, span {
+    color: $input-color;
+    font-size: rem-calc(14);
+    font-weight: 300;
+    text-decoration: none;
+  }
+
+  a {
+    &:hover {
+      color: $input-color;
+      text-decoration: underline;
+    }
+  }
+}
+
+.woocommerce-breadcrumb {
+  margin: 50px 0 30px;
+  color: $input-color;
+  font-size: 13px;
+
+  @media(max-width: 1199px) {
+    margin: 0 0 30px;
+  }
+
+  a {
+    color: $input-color;
+    font-size: 13px;
+  }
+}
