@@ -63,191 +63,340 @@ add_filter( 'woocommerce_get_related_product_cat_terms', function ( $terms, $pro
 }, 20, 2 );
 
 
+
+
+
+
+
+
+
+
+
 // birthday promotion
 
 function get_product_pairs() {
   return [
-    3974 => 4043,
-    4037 => 4035,
-    4051 => 4045, 
-    4047 => 4049, 
-    4076 => 4107, 
-    4080 => 4107, 
-    4081 => 4107, 
-    4082 => 4107, 
-    4092 => 4110, 
-    4094 => 4110, 
-    4096 => 4110, 
-    4099 => 4110, 
-    4083 => 4109, 
-    4086 => 4111, 
-    4088 => 4109, 
-    4090 => 4111
+    4303 => 4043,
+    4305 => 4043,
+    4306 => 4322,
+    4310 => 4322,
+    4313 => 4324,
+    4316 => 4326,
+    4314 => 4326,
   ];
 }
 
-// Add free product when a trigger product is added
-add_action('woocommerce_before_calculate_totals', 'add_free_product_for_trigger');
+function ercoding_build_inverse_pairs() {
+  $pairs = get_product_pairs();
+  $inverse = [];
+  foreach ($pairs as $triggerId => $bonusId) {
+    if (!isset($inverse[$bonusId])) {
+      $inverse[$bonusId] = [];
+    }
+    $inverse[$bonusId][] = $triggerId;
+  }
+  return $inverse;
+}
 
-function add_free_product_for_trigger($cart) {
-  if (is_admin() && !defined('DOING_AJAX')) {
+function ercoding_collect_cart_snapshot($cart) {
+  $items = $cart->get_cart();
+  $snapshot = [
+    'triggers' => [],       // triggerId => [ ['key'=>..., 'qty'=>...], ... ]
+    'bonuses'  => [],       // bonusId   => ['key'=>..., 'qty'=>...]
+  ];
+  $inverse = ercoding_build_inverse_pairs();
+  foreach ($items as $key => $item) {
+    $pid = isset($item['product_id']) ? $item['product_id'] : 0;
+    $qty = isset($item['quantity']) ? intval($item['quantity']) : 0;
+    $isFree = isset($item['is_birthday_free']) ? intval($item['is_birthday_free']) : 0;
+
+    if ($isFree === 1) {
+      if (!isset($snapshot['bonuses'][$pid])) {
+        $snapshot['bonuses'][$pid] = ['key' => $key, 'qty' => 0];
+      }
+      $snapshot['bonuses'][$pid]['qty'] = $snapshot['bonuses'][$pid]['qty'] + $qty;
+      continue;
+    }
+
+    $pairs = get_product_pairs();
+    if (isset($pairs[$pid])) {
+      if (!isset($snapshot['triggers'][$pid])) {
+        $snapshot['triggers'][$pid] = [];
+      }
+      $snapshot['triggers'][$pid][] = ['key' => $key, 'qty' => $qty];
+    }
+  }
+  return $snapshot;
+}
+
+function ercoding_get_needed_bonus_counts($cart) {
+  $pairs = get_product_pairs();
+  $needed = [];
+  foreach ($cart->get_cart() as $key => $item) {
+    $pid = isset($item['product_id']) ? $item['product_id'] : 0;
+    $qty = isset($item['quantity']) ? intval($item['quantity']) : 0;
+    if ($qty < 1) { continue; }
+    if (isset($pairs[$pid])) {
+      $bonusId = $pairs[$pid];
+      if (!isset($needed[$bonusId])) {
+        $needed[$bonusId] = 0;
+      }
+      $needed[$bonusId] = $needed[$bonusId] + $qty;
+    }
+  }
+  return $needed;
+}
+
+function ercoding_reconcile_bonuses_to_needed($cart) {
+  static $running = false;
+  if ($running) { return; }
+  if (!$cart) { return; }
+  $running = true;
+
+  $needed = ercoding_get_needed_bonus_counts($cart);
+  $snapshot = ercoding_collect_cart_snapshot($cart);
+
+  foreach ($needed as $bonusId => $needQty) {
+    $existing = isset($snapshot['bonuses'][$bonusId]) ? $snapshot['bonuses'][$bonusId] : null;
+
+    if ($existing) {
+      $haveQty = intval($existing['qty']);
+      if ($haveQty !== $needQty) {
+        WC()->cart->set_quantity($existing['key'], max(0, $needQty), false);
+      }
+    } else {
+      if ($needQty > 0) {
+        $key = $cart->add_to_cart($bonusId, max(1, $needQty), 0, [], ['is_birthday_free' => 1]);
+        if ($key && isset(WC()->cart->cart_contents[$key])) {
+          WC()->cart->cart_contents[$key]['is_birthday_free'] = 1;
+        }
+      }
+    }
+  }
+
+  if (!empty($snapshot['bonuses'])) {
+    foreach ($snapshot['bonuses'] as $bonusId => $data) {
+      if (!isset($needed[$bonusId]) || $needed[$bonusId] < 1) {
+        WC()->cart->remove_cart_item($data['key']);
+      }
+    }
+  }
+
+  $running = false;
+}
+
+add_action('woocommerce_cart_loaded_from_session', function ($cart) {
+  ercoding_reconcile_bonuses_to_needed($cart);
+}, 20, 1);
+
+add_action('woocommerce_add_to_cart', function () {
+  ercoding_reconcile_bonuses_to_needed(WC()->cart);
+}, 20, 0);
+
+add_action('woocommerce_after_cart_item_quantity_update', function ($cart_item_key, $new_qty, $old_qty, $cart) {
+  $item = isset($cart->cart_contents[$cart_item_key]) ? $cart->cart_contents[$cart_item_key] : null;
+  if (!$item) { return; }
+
+  $isFree = isset($item['is_birthday_free']) ? intval($item['is_birthday_free']) : 0;
+  if ($isFree !== 1) {
+    ercoding_reconcile_bonuses_to_needed($cart);
     return;
   }
 
-  $product_pairs = get_product_pairs();
-  $trigger_products_in_cart = [];
+  $bonusId = isset($item['product_id']) ? intval($item['product_id']) : 0;
+  $desiredBonusQty = max(0, intval($new_qty));
 
-  // Track the trigger products and their free products in the cart
-  foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
-    $product_id = $cart_item['product_id'];
-    if (isset($product_pairs[$product_id])) {
-      $trigger_products_in_cart[$product_id] = $product_pairs[$product_id];
-    }
-  }
+  $pairsInverse = ercoding_build_inverse_pairs();
+  $triggerIdsForBonus = isset($pairsInverse[$bonusId]) ? $pairsInverse[$bonusId] : [];
 
-  // Add free products if not already in the cart
-  foreach ($trigger_products_in_cart as $trigger_product_id => $free_product_id) {
-    $free_product_in_cart = false;
-
-    foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
-      if ($cart_item['product_id'] == $free_product_id) {
-        $free_product_in_cart = true;
-        break;
-      }
-    }
-
-    if (!$free_product_in_cart) {
-      $free_cart_item_key = $cart->add_to_cart($free_product_id);
-      if ($free_cart_item_key) {
-        WC()->cart->cart_contents[$free_cart_item_key]['free_for_product'] = $trigger_product_id;
+  $snapshot = ercoding_collect_cart_snapshot($cart);
+  $currentTriggersQty = 0;
+  foreach ($triggerIdsForBonus as $triggerId) {
+    if (isset($snapshot['triggers'][$triggerId])) {
+      foreach ($snapshot['triggers'][$triggerId] as $row) {
+        $currentTriggersQty = $currentTriggersQty + intval($row['qty']);
       }
     }
   }
 
-  // Set the price of the free products to 0
-  foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
-    if (isset($cart_item['free_for_product'])) {
-      $cart_item['data']->set_price(0);
-    }
+  if ($desiredBonusQty === $currentTriggersQty) {
+    ercoding_reconcile_bonuses_to_needed($cart);
+    return;
   }
-}
 
-// Remove free product when the trigger product is removed
-add_action('woocommerce_before_cart_item_quantity_zero', 'remove_free_product_when_trigger_removed', 10, 1);
+  $diff = $desiredBonusQty - $currentTriggersQty;
 
-function remove_free_product_when_trigger_removed($cart_item_key) {
-  $product_pairs = get_product_pairs();
-  $removed_product_id = WC()->cart->cart_contents[$cart_item_key]['product_id'];
-
-  // Check if the removed product is a trigger product
-  if (isset($product_pairs[$removed_product_id])) {
-    $free_product_id = $product_pairs[$removed_product_id];
-
-    // Remove the corresponding free product from the cart
-    foreach (WC()->cart->get_cart() as $key => $cart_item) {
-      if (isset($cart_item['free_for_product']) && $cart_item['free_for_product'] == $removed_product_id) {
-        WC()->cart->remove_cart_item($key);
-        break;
+  if ($diff > 0) {
+    foreach ($triggerIdsForBonus as $triggerId) {
+      if (!isset($snapshot['triggers'][$triggerId])) {
+        continue;
+      }
+      foreach ($snapshot['triggers'][$triggerId] as $row) {
+        $add = $diff;
+        $newTriggerQty = intval($row['qty']) + $add;
+        WC()->cart->set_quantity($row['key'], $newTriggerQty, false);
+        $diff = 0;
+        break 2;
       }
     }
-  }
-}
-
-// Remove the free product if the trigger product is no longer in the cart
-add_action('woocommerce_check_cart_items', 'ensure_free_products_linked_to_triggers');
-
-function ensure_free_products_linked_to_triggers() {
-  $product_pairs = get_product_pairs();
-  $trigger_products_in_cart = [];
-  $free_product_keys = [];
-
-  // Track which trigger products and free products are in the cart
-  foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-    $product_id = $cart_item['product_id'];
-    if (isset($product_pairs[$product_id])) {
-      $trigger_products_in_cart[$product_id] = $product_pairs[$product_id];
-    }
-
-    if (isset($cart_item['free_for_product'])) {
-      $free_product_keys[$cart_item['product_id']] = $cart_item_key;
-    }
-  }
-
-  // Ensure each free product has a corresponding trigger product in the cart
-  foreach ($product_pairs as $trigger_product_id => $free_product_id) {
-    if (!array_key_exists($trigger_product_id, $trigger_products_in_cart)) {
-      if (array_key_exists($free_product_id, $free_product_keys)) {
-        WC()->cart->remove_cart_item($free_product_keys[$free_product_id]);
+  } else {
+    $toReduce = abs($diff);
+    foreach ($triggerIdsForBonus as $triggerId) {
+      if (!isset($snapshot['triggers'][$triggerId]) || $toReduce === 0) {
+        continue;
       }
+      foreach ($snapshot['triggers'][$triggerId] as $row) {
+        if ($toReduce === 0) { break; }
+        $cur = intval($row['qty']);
+        if ($cur <= 0) { continue; }
+        $reduceBy = min($cur, $toReduce);
+        WC()->cart->set_quantity($row['key'], max(0, $cur - $reduceBy), false);
+        $toReduce = $toReduce - $reduceBy;
+        if ($toReduce === 0) { break; }
+      }
+      if ($toReduce === 0) { break; }
     }
   }
-}
 
-// Add a "surprise" class to the free product in the cart for styling
-add_filter('woocommerce_cart_item_class', 'add_surprise_class_to_free_product', 10, 3);
+  ercoding_reconcile_bonuses_to_needed($cart);
+}, 10, 4);
 
-function add_surprise_class_to_free_product($class, $cart_item, $cart_item_key) {
-  $product_pairs = get_product_pairs();
-  $free_product_ids = array_values($product_pairs);
-
-  if (in_array($cart_item['product_id'], $free_product_ids)) {
-    $class .= ' surprise';
+add_action('woocommerce_before_calculate_totals', function ($cart) {
+  if (!$cart) { return; }
+  foreach ($cart->get_cart() as $k => $item) {
+    $isFree = isset($item['is_birthday_free']) ? intval($item['is_birthday_free']) : 0;
+    if ($isFree === 1 && isset($item['data'])) {
+      $item['data']->set_price(0);
+    }
   }
+}, 20, 1);
 
-  return $class;
+add_filter('woocommerce_cart_item_class', function ($classString, $cartItem) {
+  $isFree = isset($cartItem['is_birthday_free']) ? intval($cartItem['is_birthday_free']) : 0;
+  if ($isFree === 1) {
+    $classString .= ' surprise';
+  }
+  return $classString;
+}, 10, 2);
+
+add_filter('woocommerce_cart_redirect_after_add', function () { return true; }, 10, 0);
+add_filter('woocommerce_add_to_cart_redirect', function ($url) { return wc_get_cart_url(); }, 10, 1);
+
+function ercoding_cart_all_electronic() {
+  if (!WC()->cart) {
+    return false;
+  }
+  foreach (WC()->cart->get_cart() as $cartItem) {
+    $productId = isset($cartItem['product_id']) ? intval($cartItem['product_id']) : 0;
+    if (!has_term('elektroniczny', 'product_cat', $productId)) {
+      return false;
+    }
+  }
+  return true;
 }
 
+add_filter('woocommerce_cart_needs_shipping', function ($needsShipping) {
+  if (ercoding_cart_all_electronic()) {
+    return false;
+  }
+  return $needsShipping;
+}, 10, 1);
+
+add_filter('woocommerce_cart_needs_shipping_address', function ($needsAddress) {
+  if (ercoding_cart_all_electronic()) {
+    return false;
+  }
+  return $needsAddress;
+}, 10, 1);
+
+add_filter('woocommerce_package_rates', function ($rates, $package) {
+  if (ercoding_cart_all_electronic()) {
+    return [];
+  }
+  return $rates;
+}, 10, 2);
 
 
+add_action('wp_footer', function () {
+  $cartUrl = wc_get_cart_url();
+  if (!is_cart()) {
+    ?>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (!window.jQuery) { return; }
+        jQuery(document.body).on('added_to_cart', function () {
+          window.location.href = <?php echo json_encode($cartUrl);?>;
+        });
+      });
+    </script>
+    <?php
+    return;
+  }
+  ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const cartFormElement = document.querySelector('form.woocommerce-cart-form');
+      if (!cartFormElement) { return; }
+      let debounceTimeoutId = null;
+      let isSubmittingCartUpdate = false;
 
+      function submitCartFormWithFetch() {
+        if (isSubmittingCartUpdate) { return; }
+        isSubmittingCartUpdate = true;
+        const formDataObject = new FormData(cartFormElement);
+        formDataObject.set('update_cart', 'Update cart');
+        fetch(cartFormElement.getAttribute('action') || window.location.href, {
+          method: 'POST',
+          body: formDataObject,
+          credentials: 'same-origin'
+        }).then(function (responseObject) {
+          return responseObject.text();
+        }).then(function () {
+          window.location.reload();
+        }).catch(function () {
+          cartFormElement.submit();
+        }).finally(function () {
+          isSubmittingCartUpdate = false;
+        });
+      }
 
-
-
-// Enable free shipping when all products in cart are in 'electronic' category
-add_filter( 'woocommerce_shipping_free_shipping_is_available', 'enable_free_shipping_for_electronic', 10, 3 );
-
-function enable_free_shipping_for_electronic( $is_available, $package, $shipping_method ) {
-    // Check if all products in cart are in the 'electronic' category
-    $all_electronic = true;
-    foreach ( WC()->cart->get_cart() as $cart_item ) {
-        $product_id = $cart_item['product_id'];
-        if ( ! has_term( 'elektroniczny', 'product_cat', $product_id ) ) {
-            $all_electronic = false;
-            break; // No need to check further
+      function scheduleCartUpdate(delayMs) {
+        if (debounceTimeoutId) {
+          clearTimeout(debounceTimeoutId);
         }
-    }
-    if ( $all_electronic ) {
-        // Make free shipping available regardless of minimum amount
-        $is_available = true;
-    }
-    return $is_available;
-}
+        debounceTimeoutId = setTimeout(function () {
+          submitCartFormWithFetch();
+        }, delayMs);
+      }
 
-// Restrict shipping methods to only free shipping when all products are in 'electronic' category
-add_filter( 'woocommerce_package_rates', 'adjust_shipping_methods_for_electronic_category', 10, 2 );
+      document.addEventListener('input', function (eventObject) {
+        const targetElement = eventObject.target;
+        if (!targetElement) { return; }
+        if (!cartFormElement.contains(targetElement)) { return; }
+        if (targetElement.classList.contains('qty')) {
+          scheduleCartUpdate(1500);
+        }
+      });
 
-function adjust_shipping_methods_for_electronic_category( $rates, $package ) {
-    // Check if all products in cart are in the 'electronic' category
-    $all_electronic = true;
-    foreach ( WC()->cart->get_cart() as $cart_item ) {
-        $product_id = $cart_item['product_id'];
-        if ( ! has_term( 'elektroniczny', 'product_cat', $product_id ) ) {
-            $all_electronic = false;
-            break; // No need to check further
+      document.addEventListener('change', function (eventObject) {
+        const targetElement = eventObject.target;
+        if (!targetElement) { return; }
+        if (!cartFormElement.contains(targetElement)) { return; }
+        if (targetElement.classList.contains('qty')) {
+          scheduleCartUpdate(200);
         }
-    }
-    if ( $all_electronic ) {
-        // Only allow free shipping
-        $free_shipping_rates = array();
-        foreach ( $rates as $rate_id => $rate ) {
-            if ( 'free_shipping' === $rate->method_id ) {
-                $free_shipping_rates[ $rate_id ] = $rate;
-                break; // Free shipping found, stop checking
-            }
-        }
-        if ( ! empty( $free_shipping_rates ) ) {
-            return $free_shipping_rates; // Return only free shipping
-        }
-    }
-    return $rates; // Return all rates if condition not met
-}
+      });
+
+      const updateButtons = cartFormElement.querySelectorAll('button[name="update_cart"], input[name="update_cart"]');
+      updateButtons.forEach(function (buttonElement) {
+        buttonElement.addEventListener('click', function (e) {
+          e.preventDefault();
+          submitCartFormWithFetch();
+        });
+      });
+    });
+  </script>
+  <?php
+});
+
+

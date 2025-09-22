@@ -41,7 +41,7 @@
   &__row {
     /* temporary */
     justify-content: center;
-
+    
     > li {
       @extend .col-12;
       @extend .col-md-6;
@@ -54,6 +54,12 @@
         @media(max-width: 991px) {
           height: 450px;
         }
+      }
+    }
+
+    &--warsztaty {
+      @media(min-width: 1200px) {
+        flex-direction: row-reverse;
       }
     }
   }

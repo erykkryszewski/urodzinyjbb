@@ -1028,6 +1028,9 @@
 .editor-styles-wrapper .button--continue-shopping::before, .editor-styles-wrapper .button--update-cart::before {
   display: none;
 }
+.editor-styles-wrapper .button--update-cart {
+  display: none;
+}
 .editor-styles-wrapper .button--ghost {
   background: transparent;
   border: 1px solid #030303;

@@ -45,7 +45,7 @@ $loop = new WP_Query($args);
         <h2 class="section-title"><?php echo apply_filters('the_title', $title);?></h2>
       <?php endif;?>
       <div class="popular-products__wrapper">
-        <div class="row popular-products__row">
+        <div class="row popular-products__row popular-products__row--<?php echo esc_html($section_id);?>">
           <?php while ($loop->have_posts()): $loop->the_post(); 
             $product = wc_get_product( get_the_ID() );
             $product_categories = wp_get_post_terms(get_the_ID(), 'product_cat', array('fields' => 'slugs'));

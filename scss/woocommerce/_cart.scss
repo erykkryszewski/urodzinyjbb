@@ -92,7 +92,7 @@
             height: 100%;
             display: block;
             max-width: 100%;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: $theme-border-radius;
           }
         }
