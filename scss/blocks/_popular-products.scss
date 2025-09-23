@@ -1,66 +1,68 @@
 .popular-products {
-  width: 100%;
-  position: relative;
-  overflow: hidden;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
 
-  &--background {
-    background: $very-light-gray;
-  }
-
-  h2 {
-    &.section-title {
-      text-align: center;
-      margin: 0 0 30px;
-      
-      @media(max-width: 991px) {
-        margin: 0 0 10px;
-      }
-    }
-  }
-
-  &__decoration-title {
-    @extend .h1;
-    position: absolute;
-    right: 50%;
-    transform: translateX(50%);
-    text-transform: uppercase;
-    opacity: 0.03;
-    font-size: 15vw;
-    top: -51px;
-    max-width: 100%;
-
-    @media(max-width: 1500px) {
-      top: -35px;
+    &--background {
+        background: $very-light-gray;
     }
 
-    @media(max-width: 991px) {
-      display: none;
-    }
-  }
+    h2 {
+        &.section-title {
+            text-align: center;
+            margin: 0 0 30px;
 
-  &__row {
-    /* temporary */
-    justify-content: center;
-    
-    > li {
-      @extend .col-12;
-      @extend .col-md-6;
-      @extend .col-lg-3;
-      list-style: none;
-
-      .product__image {
-        height: 295px;
-
-        @media(max-width: 991px) {
-          height: 450px;
+            @media (width <= 991px) {
+                margin: 0 0 10px;
+            }
         }
-      }
     }
 
-    &--warsztaty {
-      @media(min-width: 1200px) {
-        flex-direction: row-reverse;
-      }
+    &__decoration-title {
+        position: absolute;
+        right: 50%;
+        transform: translateX(50%);
+        text-transform: uppercase;
+        opacity: 0.03;
+        font-size: 15vw;
+        top: -51px;
+        max-width: 100%;
+
+        @extend .h1;
+
+        @media (width <= 1500px) {
+            top: -35px;
+        }
+
+        @media (width <= 991px) {
+            display: none;
+        }
     }
-  }
+
+    &__row {
+        /* temporary */
+        justify-content: center;
+
+        > li {
+            list-style: none;
+
+            .product__image {
+                height: 440px;
+
+                @media (width <= 991px) {
+                    height: 450px;
+                }
+            }
+
+            @extend .col-12;
+            @extend .col-md-6;
+            @extend .col-lg-4;
+        }
+
+        &--warsztaty {
+            @media (width >= 1200px) {
+                flex-direction: row-reverse;
+            }
+        }
+    }
 }
