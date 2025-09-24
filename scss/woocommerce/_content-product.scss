@@ -59,7 +59,7 @@
             border-top-left-radius: $theme-border-radius;
             border-top-right-radius: $theme-border-radius;
 
-            @extend .object-fit-cover;
+            @extend .object-fit-contain;
         }
 
         // &:before {
