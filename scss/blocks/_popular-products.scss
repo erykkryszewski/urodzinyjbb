@@ -60,6 +60,8 @@
         }
 
         &--warsztaty {
+            flex-direction: column-reverse;
+
             @media (width >= 1200px) {
                 flex-direction: row-reverse;
             }
